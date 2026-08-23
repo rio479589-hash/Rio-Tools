@@ -1,0 +1,11 @@
+0.00 press up
+0.01 steer 40000
+0.80 steer -29216
+0.84 steer -46712
+0.91 steer 51063
+0.99 steer 46533
+1.18 steer 0
+1.53 steer 60940
+1.63 steer -29736
+1.69 steer 49379
+1.89 steer -63353

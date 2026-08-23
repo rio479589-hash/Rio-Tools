@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rio Tools</title>
+    <style>
+        :root {
+            /* Windows 11 Light Ice Theme */
+            --ice-1: #e0f2fe;
+            --ice-2: #bae6fd;
+            --ice-3: #7dd3fc;
+            --ice-4: #38bdf8;
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.7);
+            --glass-border-light: rgba(255, 255, 255, 0.9);
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --input-bg: rgba(255, 255, 255, 0.65);
+            --item-bg: rgba(255, 255, 255, 0.45);
+            --item-hover: rgba(255, 255, 255, 0.85);
+            --progress-bg: rgba(255, 255, 255, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--ice-1), var(--ice-3));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Decorative Background Frost Orbs */
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        body::before {
+            width: 420px;
+            height: 420px;
+            background: rgba(255, 255, 255, 0.85);
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            width: 520px;
+            height: 520px;
+            background: var(--ice-4);
+            bottom: -150px;
+            right: -100px;
+            opacity: 0.35;
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px) saturate(130%);
+            -webkit-backdrop-filter: blur(30px) saturate(130%);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-border-light);
+            border-left: 1px solid var(--glass-border-light);
+            border-radius: 16px;
+            padding: 36px 40px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+            transition: max-width 0.2s ease;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            text-align: center;
+            background: linear-gradient(90deg, #0f172a, #0369a1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        /* Segmented Navigation Tabs */
+        .tab-nav {
+            display: flex;
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+
+        .tab-nav.main-nav {
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 7px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-nav.main-nav .tab-btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-main);
+        }
+
+        /* Tab Content Containers */
+        .main-tab-content, .sub-tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active, .sub-tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(3px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label.title {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.15s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        input[type="number"]:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        /* Toggles */
+        .toggles-container {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            justify-content: center;
+        }
+
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            user-select: none;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.15);
+            transition: .2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Buttons */
+        button.action-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(180deg, #0ea5e9, var(--accent));
+            color: white;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--accent-hover);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:active { transform: translateY(1px); }
+
+        .btn-secondary {
+            background: var(--item-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            margin-top: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--item-hover);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Results List (SpeedTAS) */
+        #results {
+            margin-top: 20px;
+            max-height: 240px;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding-right: 4px;
+        }
+
+        #results::-webkit-scrollbar { width: 4px; }
+        #results::-webkit-scrollbar-track { background: transparent; }
+        #results::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 10px; }
+
+        .track-item {
+            padding: 10px 14px;
+            background: var(--item-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        .track-item:hover {
+            background: var(--item-hover);
+            transform: translateX(4px) !important;
+        }
+
+        .track-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            transition: all 0.15s;
+            border: 1px solid rgba(2, 132, 199, 0.2);
+        }
+
+        .track-item a:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Timer UI */
+        .timer-card {
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #0c4a6e;
+            font-variant-numeric: tabular-nums;
+            margin: 5px 0;
+        }
+
+        .timer-status {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-hover);
+            margin-bottom: 12px;
+        }
+
+        .progress-container {
+            background: var(--progress-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+            padding: 2px;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #38bdf8, #0284c7);
+            border-radius: 6px;
+            transition: width 0.2s linear;
+        }
+
+        .timer-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .spacebar-hint {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            font-weight: 600;
+        }
+
+        .spacebar-key {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--glass-border);
+            border-bottom-width: 2px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: var(--text-main);
+        }
+
+        .timer-actions { display: flex; gap: 10px; }
+        .timer-actions button { flex: 1; }
+
+        /* Inputs Grid UI (Adapted to Light Theme) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--item-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            background: var(--item-hover);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .trick-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid var(--glass-border-light);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .card .btn-primary { padding: 8px; font-size: 12px; margin-top: auto; }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Rio Tools</h1>
+
+    <!-- Top-level Navigation -->
+    <div class="tab-nav main-nav">
+        <button class="tab-btn active" onclick="switchMainTab('speedtas-section', this)">SpeedTAS</button>
+        <button class="tab-btn" onclick="switchMainTab('inputs-section', this)">Inputs</button>
+    </div>
+
+    <!-- TOOL 1: SpeedTAS -->
+    <div id="speedtas-section" class="main-tab-content active">
+        
+        <!-- SpeedTAS Sub-navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchSubTab('randomizerTab', this)">Randomizer</button>
+            <button class="tab-btn" onclick="switchSubTab('practiceTab', this)">Practice</button>
+        </div>
+
+        <!-- Randomizer Tab -->
+        <div id="randomizerTab" class="sub-tab-content active">
+            <div class="control-group">
+                <label class="title" for="amount">How many tracks do you want to TAS?</label>
+                <input type="number" id="amount" min="1" value="5">
+            </div>
+
+            <div class="toggles-container">
+                <label class="toggle-wrapper">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="toggleS1" checked>
+                        <span class="slider"></span>
+                    </div>
+                    Season 1
+                </label>
+                
+                <label class="toggle-wrapper">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="toggleS2" checked>
+                        <span class="slider"></span>
+                    </div>
+                    Season 2
+                </label>
+            </div>
+
+            <button class="action-btn btn-primary" onclick="generateLinks()">Pick Tracks</button>
+            
+            <div id="results"></div>
+            
+            <button class="action-btn btn-secondary" id="openAllBtn" style="display: none;" onclick="openAllLinks()">Open All Links</button>
+        </div>
+
+        <!-- Practice Timer Tab -->
+        <div id="practiceTab" class="sub-tab-content">
+            <div class="control-group">
+                <label class="title" for="timerDuration">Practice Duration (Minutes)</label>
+                <input type="number" id="timerDuration" min="1" max="300" value="40" onchange="setCustomTime()">
+            </div>
+
+            <div class="timer-card">
+                <div class="timer-status" id="timerStatus">Ready</div>
+                <div class="timer-display" id="timerDisplay">40:00</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar" style="width: 100%;"></div>
+                </div>
+                
+                <div class="timer-meta">
+                    <span id="timeElapsed">00:00 elapsed</span>
+                    <span id="timePercent">100% remaining</span>
+                </div>
+            </div>
+
+            <div class="timer-actions">
+                <button class="action-btn btn-primary" id="startPauseBtn" onclick="toggleTimer()">Start</button>
+                <button class="action-btn btn-secondary" style="margin-top:0;" onclick="resetTimer()">Reset</button>
+            </div>
+
+            <div class="spacebar-hint">
+                Press <span class="spacebar-key">Space</span> to Pause / Resume
+            </div>
+        </div>
+    </div>
+
+    <!-- TOOL 2: Inputs -->
+    <div id="inputs-section" class="main-tab-content">
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <div class="tab-nav" style="margin-bottom: 0; width: 220px;">
+                <button class="tab-btn active" id="btn-l" onclick="setDirection('l')">Left</button>
+                <button class="tab-btn" id="btn-r" onclick="setDirection('r')">Right</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <img src="website images/1.png" alt="Trick 1" class="trick-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMGYyZmUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iIzQ3NTU2OSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj4xLnBuZzwvdGV4dD48L3N2Zz4='">
+                <div class="card-title">Trick 1</div>
+                <button class="action-btn btn-primary" onclick="downloadFile(1)">Download</button>
+            </div>
+
+            <div class="card">
+                <img src="website images/2.png" alt="Trick 2" class="trick-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMGYyZmUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iIzQ3NTU2OSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj4yLnBuZzwvdGV4dD48L3N2Zz4='">
+                <div class="card-title">Trick 2</div>
+                <button class="action-btn btn-primary" onclick="downloadFile(2)">Download</button>
+            </div>
+
+            <div class="card">
+                <img src="website images/3.png" alt="Trick 3" class="trick-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMGYyZmUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iIzQ3NTU2OSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj4zLnBuZzwvdGV4dD48L3N2Zz4='">
+                <div class="card-title">Trick 3</div>
+                <button class="action-btn btn-primary" onclick="downloadFile(3)">Download</button>
+            </div>
+
+            <div class="card">
+                <img src="website images/4.png" alt="Trick 4" class="trick-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMGYyZmUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iIzQ3NTU2OSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj40LnBuZzwvdGV4dD48L3N2Zz4='">
+                <div class="card-title">Trick 4</div>
+                <button class="action-btn btn-primary" onclick="downloadFile(4)">Download</button>
+            </div>
+
+            <div class="card">
+                <img src="website images/5.png" alt="Trick 5" class="trick-img" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMGYyZmUiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZmlsbD0iIzQ3NTU2OSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj41LnBuZzwvdGV4dD48L3N2Zz4='">
+                <div class="card-title">Trick 5</div>
+                <div class="tab-nav" style="padding: 2px; margin-bottom: 8px;">
+                    <button class="tab-btn active" id="v1-btn" style="padding: 4px; font-size: 11px;" onclick="setTrick5Version('1')">v1</button>
+                    <button class="tab-btn" id="v2-btn" style="padding: 4px; font-size: 11px;" onclick="setTrick5Version('2')">v2</button>
+                </div>
+                <button class="action-btn btn-primary" onclick="downloadFile(5)">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- UI NAVIGATION LOGIC ---
+    function switchMainTab(tabId, element) {
+        document.querySelectorAll('.main-tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.main-nav .tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    function switchSubTab(tabId, element) {
+        document.querySelectorAll('.sub-tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('#speedtas-section > .tab-nav .tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+
+    // --- SPEEDTAS RANDOMIZER LOGIC ---
+    const season1 = [
+        { name: "SpeedTAS nº1", url: "https://tmnf.exchange/trackshow/11621106" }, { name: "SpeedTAS nº2", url: "https://tmnf.exchange/trackshow/11621114" },
+        { name: "SpeedTAS nº3", url: "https://tmnf.exchange/trackshow/11621117" }, { name: "SpeedTAS nº6", url: "https://tmnf.exchange/trackshow/11637571" },
+        { name: "SpeedTAS nº7", url: "https://tmnf.exchange/trackshow/11708519" }, { name: "SpeedTAS nº8", url: "https://tmnf.exchange/trackshow/11827410" },
+        { name: "SpeedTAS nº9", url: "https://tmnf.exchange/trackshow/11827441" }, { name: "SpeedTAS nº10", url: "https://tmnf.exchange/trackshow/11827444" },
+        { name: "SpeedTAS nº11", url: "https://tmnf.exchange/trackshow/11827447" }, { name: "SpeedTAS nº12", url: "https://tmnf.exchange/trackshow/11827450" },
+        { name: "SpeedTAS nº13", url: "https://tmnf.exchange/trackshow/12206475" }, { name: "SpeedTAS nº14", url: "https://tmnf.exchange/trackshow/12206480" },
+        { name: "SpeedTAS nº15", url: "https://tmnf.exchange/trackshow/12206483" }, { name: "SpeedTAS nº16", url: "https://tmnf.exchange/trackshow/12206486" },
+        { name: "SpeedTAS nº17", url: "https://tmnf.exchange/trackshow/12206489" }, { name: "SpeedTAS nº18", url: "https://tmnf.exchange/trackshow/12206492" },
+        { name: "SpeedTAS nº19", url: "https://tmnf.exchange/trackshow/12206495" }, { name: "SpeedTAS nº20", url: "https://tmnf.exchange/trackshow/12206498" },
+        { name: "SpeedTAS nº21", url: "https://tmnf.exchange/trackshow/12206501" }, { name: "SpeedTAS nº22", url: "https://tmnf.exchange/trackshow/12206504" },
+        { name: "SpeedTAS nº23", url: "https://tmnf.exchange/trackshow/12206507" }, { name: "SpeedTAS nº24", url: "https://tmnf.exchange/trackshow/12206510" },
+        { name: "SpeedTAS nº25", url: "https://tmnf.exchange/trackshow/13171600" }, { name: "SpeedTAS nº26", url: "https://tmnf.exchange/trackshow/13171603" },
+        { name: "SpeedTAS nº27", url: "https://tmnf.exchange/trackshow/13171609" }, { name: "SpeedTAS nº28", url: "https://tmnf.exchange/trackshow/13171612" },
+        { name: "SpeedTAS nº29", url: "https://tmnf.exchange/trackshow/13171615" }, { name: "SpeedTAS nº30", url: "https://tmnf.exchange/trackshow/13171618" },
+        { name: "SpeedTAS nº31", url: "https://tmnf.exchange/trackshow/13171621" }, { name: "SpeedTAS nº32", url: "https://tmnf.exchange/trackshow/13171624" },
+        { name: "SpeedTAS nº33", url: "https://tmnf.exchange/trackshow/13171627" }, { name: "SpeedTAS nº34", url: "https://tmnf.exchange/trackshow/13171630" },
+        { name: "SpeedTAS nº35", url: "https://tmnf.exchange/trackshow/13171635" }, { name: "SpeedTAS nº36", url: "https://tmnf.exchange/trackshow/13171638" },
+        { name: "SpeedTAS nº37", url: "https://tmnf.exchange/trackshow/13171641" }, { name: "SpeedTAS nº38", url: "https://tmnf.exchange/trackshow/13171645" },
+        { name: "SpeedTAS nº39", url: "https://tmnf.exchange/trackshow/13171649" }, { name: "SpeedTAS nº40", url: "https://tmnf.exchange/trackshow/13171652" },
+        { name: "SpeedTAS nº41", url: "https://tmnf.exchange/trackshow/13171655" }, { name: "SpeedTAS nº42", url: "https://tmnf.exchange/trackshow/13171660" },
+        { name: "SpeedTAS nº43", url: "https://tmnf.exchange/trackshow/13171663" }, { name: "SpeedTAS nº44", url: "https://tmnf.exchange/trackshow/13171669" },
+        { name: "SpeedTAS nº45", url: "https://tmnf.exchange/trackshow/13171672" }, { name: "SpeedTAS nº46", url: "https://tmnf.exchange/trackshow/13171675" },
+        { name: "SpeedTAS nº47", url: "https://tmnf.exchange/trackshow/13171678" }, { name: "SpeedTAS nº48", url: "https://tmnf.exchange/trackshow/13171681" },
+        { name: "SpeedTAS nº49", url: "https://tmnf.exchange/trackshow/13171684" }, { name: "SpeedTAS nº50", url: "https://tmnf.exchange/trackshow/13171687" },
+        { name: "SpeedTAS nº51", url: "https://tmnf.exchange/trackshow/13171690" }, { name: "SpeedTAS nº52", url: "https://tmnf.exchange/trackshow/13171693" },
+        { name: "SpeedTAS nº53", url: "https://tmnf.exchange/trackshow/13171696" }, { name: "SpeedTAS nº54", url: "https://tmnf.exchange/trackshow/13171701" },
+        { name: "SpeedTAS nº55", url: "https://tmnf.exchange/trackshow/13171704" }, { name: "SpeedTAS nº56", url: "https://tmnf.exchange/trackshow/13171707" },
+        { name: "SpeedTAS nº57", url: "https://tmnf.exchange/trackshow/13171712" }, { name: "SpeedTAS nº58", url: "https://tmnf.exchange/trackshow/13171717" },
+        { name: "SpeedTAS nº59", url: "https://tmnf.exchange/trackshow/13171720" }, { name: "SpeedTAS nº60", url: "https://tmnf.exchange/trackshow/13171723" },
+        { name: "SpeedTAS nº61", url: "https://tmnf.exchange/trackshow/13171726" }, { name: "SpeedTAS nº62", url: "https://tmnf.exchange/trackshow/13171729" },
+        { name: "SpeedTAS nº63", url: "https://tmnf.exchange/trackshow/13171732" }, { name: "SpeedTAS nº64", url: "https://tmnf.exchange/trackshow/13171735" },
+        { name: "SpeedTAS nº65", url: "https://tmnf.exchange/trackshow/13171738" }, { name: "SpeedTAS nº66", url: "https://tmnf.exchange/trackshow/13171741" },
+        { name: "SpeedTAS nº67", url: "https://tmnf.exchange/trackshow/13171744" }, { name: "SpeedTAS nº68", url: "https://tmnf.exchange/trackshow/13171747" }
+    ];
+
+    const season2 = [
+        { name: "SpeedTAS Season 2 nº1", url: "https://tmtas.exchange/events/40" }, { name: "SpeedTAS Season 2 nº2", url: "https://tmtas.exchange/events/41" },
+        { name: "SpeedTAS Season 2 nº3", url: "https://tmtas.exchange/events/42" }, { name: "SpeedTAS Season 2 nº4", url: "https://tmtas.exchange/events/44" },
+        { name: "SpeedTAS Season 2 nº5", url: "https://tmtas.exchange/events/45" }, { name: "SpeedTAS Season 2 nº6", url: "https://tmtas.exchange/events/46" },
+        { name: "SpeedTAS Season 2 nº7", url: "https://tmtas.exchange/events/47" }, { name: "SpeedTAS Season 2 nº8", url: "https://tmtas.exchange/events/49" },
+        { name: "SpeedTAS Season 2 nº9", url: "https://tmtas.exchange/events/50" }, { name: "SpeedTAS Season 2 nº10", url: "https://tmtas.exchange/events/51" },
+        { name: "SpeedTAS Season 2 nº11", url: "https://tmtas.exchange/events/52" }, { name: "SpeedTAS Season 2 nº12", url: "https://tmtas.exchange/events/53" },
+        { name: "SpeedTAS Season 2 nº13", url: "https://tmtas.exchange/events/55" }, { name: "SpeedTAS Season 2 nº14", url: "https://tmtas.exchange/events/67" },
+        { name: "SpeedTAS Season 2 nº15", url: "https://tmtas.exchange/events/80" }, { name: "SpeedTAS Season 2 nº16", url: "https://tmtas.exchange/events/93" },
+        { name: "SpeedTAS Season 2 nº17", url: "https://tmtas.exchange/events/99" }, { name: "SpeedTAS Season 2 nº18", url: "https://tmtas.exchange/events/104" },
+        { name: "SpeedTAS Season 2 nº19", url: "https://tmtas.exchange/events/108" }, { name: "SpeedTAS Season 2 nº20", url: "https://tmtas.exchange/events/111" },
+        { name: "SpeedTAS Season 2 nº21", url: "https://tmtas.exchange/events/115" }, { name: "SpeedTAS Season 2 nº22", url: "https://tmtas.exchange/events/121" },
+        { name: "SpeedTAS Season 2 nº23", url: "https://tmtas.exchange/events/125" }, { name: "SpeedTAS Season 2 nº24", url: "https://tmtas.exchange/events/134" },
+        { name: "SpeedTAS Season 2 nº25", url: "https://tmtas.exchange/events/160" }, { name: "SpeedTAS Season 2 nº26", url: "https://tmtas.exchange/events/164" },
+        { name: "SpeedTAS Season 2 nº27", url: "https://tmtas.exchange/events/166" }, { name: "SpeedTAS Season 2 nº28", url: "https://tmtas.exchange/events/173" },
+        { name: "SpeedTAS Season 2 nº29", url: "https://tmtas.exchange/events/187" }, { name: "SpeedTAS Season 2 nº30", url: "https://tmtas.exchange/events/189" },
+        { name: "SpeedTAS Season 2 nº100", url: "https://tmtas.exchange/events/195" }
+    ];
+
+    let currentSelection = [];
+
+    function generateLinks() {
+        const s1Checked = document.getElementById('toggleS1').checked;
+        const s2Checked = document.getElementById('toggleS2').checked;
+        const amount = parseInt(document.getElementById('amount').value);
+        const resultsDiv = document.getElementById('results');
+        const openAllBtn = document.getElementById('openAllBtn');
+
+        resultsDiv.innerHTML = '';
+        currentSelection = [];
+        openAllBtn.style.display = 'none';
+
+        if (isNaN(amount) || amount <= 0) {
+            resultsDiv.innerHTML = '<div class="track-item" style="color: #ef4444; justify-content: center;">Please enter a valid number.</div>';
+            return;
+        }
+
+        let pool = [];
+        if (s1Checked) pool = pool.concat(season1);
+        if (s2Checked) pool = pool.concat(season2);
+
+        if (pool.length === 0) {
+            resultsDiv.innerHTML = '<div class="track-item" style="color: #ef4444; justify-content: center;">Please select at least one season.</div>';
+            return;
+        }
+
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+
+        currentSelection = pool.slice(0, Math.min(amount, pool.length));
+
+        currentSelection.forEach((track, index) => {
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track-item';
+            trackDiv.style.animationDelay = `${index * 0.03}s`;
+            trackDiv.innerHTML = `<span>${track.name}</span> <a href="${track.url}" target="_blank">View</a>`;
+            resultsDiv.appendChild(trackDiv);
+        });
+
+        if (currentSelection.length > 0) {
+            openAllBtn.style.display = 'block';
+        }
+    }
+
+    function openAllLinks() {
+        if (currentSelection.length > 0) {
+            currentSelection.forEach(track => {
+                window.open(track.url, '_blank');
+            });
+        }
+    }
+
+
+    // --- TIMER LOGIC ---
+    let totalSeconds = 40 * 60;
+    let remainingSeconds = 40 * 60;
+    let timerInterval = null;
+    let isRunning = false;
+
+    function formatTime(secs) {
+        const mins = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+        const display = document.getElementById('timerDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const elapsedSpan = document.getElementById('timeElapsed');
+        const percentSpan = document.getElementById('timePercent');
+
+        display.textContent = formatTime(remainingSeconds);
+
+        const elapsedSeconds = totalSeconds - remainingSeconds;
+        elapsedSpan.textContent = `${formatTime(elapsedSeconds)} elapsed`;
+
+        const percentage = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
+        progressBar.style.width = `${Math.max(0, percentage)}%`;
+        percentSpan.textContent = `${Math.round(percentage)}% remaining`;
+    }
+
+    function setCustomTime() {
+        if (isRunning) pauseTimer();
+        const inputMins = parseInt(document.getElementById('timerDuration').value);
+        if (!isNaN(inputMins) && inputMins > 0) {
+            totalSeconds = inputMins * 60;
+            remainingSeconds = totalSeconds;
+            document.getElementById('timerStatus').textContent = 'Ready';
+            updateTimerUI();
+        }
+    }
+
+    function toggleTimer() {
+        if (isRunning) {
+            pauseTimer();
+        } else {
+            startTimer();
+        }
+    }
+
+    function startTimer() {
+        if (remainingSeconds <= 0) return;
+        isRunning = true;
+        document.getElementById('startPauseBtn').textContent = 'Pause';
+        document.getElementById('timerStatus').textContent = 'Running';
+        
+        timerInterval = setInterval(() => {
+            if (remainingSeconds > 0) {
+                remainingSeconds--;
+                updateTimerUI();
+            } else {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('startPauseBtn').textContent = 'Start';
+                document.getElementById('timerStatus').textContent = 'Completed';
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isRunning = false;
+        clearInterval(timerInterval);
+        document.getElementById('startPauseBtn').textContent = 'Resume';
+        document.getElementById('timerStatus').textContent = 'Paused';
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        const inputMins = parseInt(document.getElementById('timerDuration').value) || 40;
+        totalSeconds = inputMins * 60;
+        remainingSeconds = totalSeconds;
+        document.getElementById('startPauseBtn').textContent = 'Start';
+        document.getElementById('timerStatus').textContent = 'Ready';
+        updateTimerUI();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' || e.key === ' ') {
+            const activeTag = document.activeElement.tagName.toLowerCase();
+            if (activeTag === 'input' || activeTag === 'textarea') return;
+            e.preventDefault();
+            // Only trigger if timer section is active
+            if(document.getElementById('speedtas-section').classList.contains('active') && document.getElementById('practiceTab').classList.contains('active')) {
+                toggleTimer();
+            }
+        }
+    });
+
+    updateTimerUI();
+
+
+    // --- INPUTS LOGIC ---
+    // File contents are no longer hard-coded. Instead, the correct .txt file
+    // is fetched from the "input files" folder (located next to index.html)
+    // and downloaded as a real file, keeping its original filename.
+    const INPUT_FILES_DIR = 'input files';
+
+    let currentDir = 'l';
+    let trick5Ver = '1';
+
+    function setDirection(dir) {
+        currentDir = dir;
+        document.getElementById('btn-l').classList.toggle('active', dir === 'l');
+        document.getElementById('btn-r').classList.toggle('active', dir === 'r');
+    }
+
+    function setTrick5Version(ver) {
+        trick5Ver = ver;
+        document.getElementById('v1-btn').classList.toggle('active', ver === '1');
+        document.getElementById('v2-btn').classList.toggle('active', ver === '2');
+    }
+
+    async function downloadFile(trickNum) {
+        const fileKey = trickNum === 5 ? `5-${trick5Ver}-${currentDir}` : `${trickNum}-${currentDir}`;
+        const fileName = `${fileKey}.txt`;
+        const filePath = `${INPUT_FILES_DIR}/${fileName}`;
+
+        try {
+            const response = await fetch(filePath);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${filePath}: ${response.status} ${response.statusText}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            console.error(err);
+            alert(`Could not download "${fileName}". Make sure the "input files" folder is next to index.html and contains this file.`);
+        }
+    }
+</script>
+
+</body>
+</html>
